@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <sys/socket.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -57,21 +58,33 @@ tcp_server::tcp_server(int port) {
 
 //---------------------------------------------------------------------------------------------------------------------
 void tcp_server::accept_connection() {
-    
-    socklen_t client_socket_size = sizeof(client_address);
-    client_handle = accept(socket_handle, (struct sockaddr*)&client_address, &client_socket_size); 
-    client_ip = inet_ntoa(client_address.sin_addr);
 
-    std::cout << "[info] accepted connection from: " << client_ip << std::endl;
+    socklen_t client_socket_size = sizeof(client_address_);
+    int status;
 
     // todo: check for dead connection and go back to listening for new ones
     while (true){
-        int status = recv(client_handle, data, MTU_SIZE, 0);
-        if (status != -1 && status != 0){
-            std::cout << std::string(data) << std::endl;
-        }
-    }
+        client_handle_ = accept(socket_handle_, (struct sockaddr*)&client_address_, &client_socket_size);
+        client_ip_ = inet_ntoa(client_address_.sin_addr);
 
+        std::cout << "[info] accepted connection from: " << client_ip_ << std::endl;
+
+        do
+        {
+            status = recv(client_handle_, data_, MTU_SIZE, 0);
+            if (status != -1 && status != 0){
+                std::cout << std::string(data_) << std::endl;
+            }
+            else
+            {
+                if(status == 0)
+                {
+                    std::cout << "Ending TCP connection ... " << std::endl;
+                }
+                close(client_handle_);
+            }
+        } while (status > 0);
+    }
 }
 
 
