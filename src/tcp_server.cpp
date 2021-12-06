@@ -12,24 +12,45 @@ tcp_server::tcp_server(int port) {
 
     std::cout << "[info] server init" << std::endl;
 
-    socket_handle = socket(AF_INET, SOCK_STREAM, 0);
-
-    std::vector<int> options = {SO_REUSEPORT, SO_REUSEADDR};
+    socket_handle_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_handle_ < 0)
+    {
+        int errsv = errno;
+        error_handling("tcp_server: opening stream socket failed with errno: " + std::to_string(errsv));
+    }
 
     // todo: check for errors, report them
-    setsockopt(socket_handle, SOL_SOCKET, 2, (char*)&options, sizeof(options));
+    int reuse = 1;
+    if (setsockopt(socket_handle_, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
+    {
+        int errsv = errno;
+        error_handling("tcp_server: setsockopt(SO_REUSEADDR) failed with errno: " + std::to_string(errsv));
+    }
+    if (setsockopt(socket_handle_, SOL_SOCKET, SO_REUSEPORT, (const char*)&reuse, sizeof(reuse)) < 0)
+    {
+        int errsv = errno;
+        error_handling("tcp_server: setsockopt(SO_REUSEPORT) failed with errno: " + std::to_string(errsv));
+    }
 
-    memset(&server_address, 0, sizeof(server_address));
+    memset(&server_address_, 0, sizeof(server_address_));
 
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(port);
+    server_address_.sin_family = AF_INET;
+    server_address_.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address_.sin_port = htons(port);
 
     // todo: check for errors
-    bind(socket_handle, (struct sockaddr *)&server_address, sizeof(server_address));
+    if (bind(socket_handle_, (struct sockaddr *)&server_address_, sizeof(server_address_)) < 0)
+    {
+        int errsv = errno;
+        error_handling("tcp_server: bind() failed with errno: " + std::to_string(errsv));
+    }
 
     // todo: check for errors
-    listen(socket_handle, 1);
+    if (listen(socket_handle_, 1) < 0)
+    {
+        int errsv = errno;
+        error_handling("tcp_server: listen() failed with errno: " + std::to_string(errsv));
+    }
 
     // todo: handle errors of this constructor
 }
@@ -53,7 +74,18 @@ void tcp_server::accept_connection() {
 
 }
 
+
 //---------------------------------------------------------------------------------------------------------------------
 tcp_server::~tcp_server(){
+
     // todo: clean up
 }
+
+
+//---------------------------------------------------------------------------------------------------------------------
+void tcp_server::error_handling(const std::string &message) {
+
+    std::cerr << message << std::endl;
+    exit(1);
+}
+

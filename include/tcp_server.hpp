@@ -14,22 +14,17 @@ class tcp_server {
         
         void accept_connection();
 
-
     private:
-        int socket_handle{0};
-        struct sockaddr_in server_address;
+        void error_handling(const std::string &message);
 
-        int client_handle{0};
-        struct sockaddr_in client_address;
-        std::string client_ip;
-        char data[MTU_SIZE];
+        int socket_handle_{0};
+        struct sockaddr_in server_address_;
+
+        int client_handle_{0};
+        struct sockaddr_in client_address_;
+        std::string client_ip_;
+        char data_[MTU_SIZE];
 
 };
-
-
-
-
-
-
 
 #endif // TCP_SERVER_HPP
