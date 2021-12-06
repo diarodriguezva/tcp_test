@@ -21,3 +21,18 @@ target_link_libraries(exercise
     PRIVATE
         exerciseLib
 )
+
+add_custom_target(my_custom_target
+    DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/tcp_client
+    VERBATIM
+)
+
+add_custom_command(
+    OUTPUT
+        "${CMAKE_CURRENT_BINARY_DIR}/tcp_client"
+    COMMAND
+        ${CMAKE_COMMAND} -E cp ${CMAKE_CURRENT_SOURCE_DIR}/scripts/tcp_client.sh ${CMAKE_CURRENT_BINARY_DIR}/tcp_client.sh
+    DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/tcp_client.sh
+)
