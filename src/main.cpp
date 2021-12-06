@@ -9,12 +9,8 @@ int main(int argc, char** argv){
 
     // todo: catch SIGINT to stop the server gracefully
 
-    while (true){
-
-        // todo: fix this function to repeatedly accept new connections
-        server->accept_connection(); 
-         
-    }
+    // todo: fix this function to repeatedly accept new connections
+    server->accept_connection();
 
     // did we forget something?
 
