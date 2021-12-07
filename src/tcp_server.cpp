@@ -20,14 +20,13 @@ tcp_server::tcp_server(int port) {
 
     std::cout << "[info] server init" << std::endl;
 
-    socket_handle_ = socket(AF_INET, SOCK_STREAM, 0);
-    if (socket_handle_ < 0)
+    if (socket_handle_ = socket(AF_INET, SOCK_STREAM, 0) < 0)
     {
         int errsv = errno;
-        error_handling("tcp_server: opening stream socket failed with errno: " + std::to_string(errsv));
+        error_handling("tcp_server: opening stream socket failed ()with errno: " + std::to_string(errsv));
     }
 
-    // todo: check for errors, report them
+    // TODO: check for errors, report them
     int reuse = 1;
     if (setsockopt(socket_handle_, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) < 0)
     {
@@ -49,21 +48,21 @@ tcp_server::tcp_server(int port) {
     server_address_.sin_addr.s_addr = htonl(INADDR_ANY);
     server_address_.sin_port = htons(port);
 
-    // todo: check for errors
+    // TODO: check for errors
     if (bind(socket_handle_, (struct sockaddr *)&server_address_, sizeof(server_address_)) < 0)
     {
         int errsv = errno;
         error_handling("tcp_server: bind() failed with errno: " + std::to_string(errsv));
     }
 
-    // todo: check for errors
+    // TODO: check for errors
     if (listen(socket_handle_, 1) < 0)
     {
         int errsv = errno;
         error_handling("tcp_server: listen() failed with errno: " + std::to_string(errsv));
     }
 
-    // todo: handle errors of this constructor
+    // TODO: handle errors of this constructor
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -108,7 +107,6 @@ tcp_server::~tcp_server(){
     stop();
 }
 
-    // todo: clean up
 
 void tcp_server::handle_sigint()
 {
@@ -135,3 +133,10 @@ void tcp_server::error_handling(const std::string &message) {
     exit(1);
 }
 
+
+// Sources:
+// Socket Tutorial (Oracle): https://docs.oracle.com/cd/E19620-01/805-4041/6j3r8iu2l/index.html
+// http://dwise1.net/pgm/sockets/tcp_ip.html#SHUTDOWN
+
+// API doc
+// https://pubs.opengroup.org/onlinepubs/000095399/functions/socket.html
