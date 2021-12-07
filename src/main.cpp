@@ -14,6 +14,7 @@ int main(int argc, char** argv){
     server->accept_connection();
 
     // did we forget something?
+    server->stop();
 
     return 0;
 }

@@ -11,9 +11,10 @@ class tcp_server {
 
     public:
         tcp_server(int port);
-       ~tcp_server();
+        ~tcp_server();
         
         void accept_connection();
+        void stop();
 
         void handle_sigint();
 
@@ -35,7 +36,6 @@ class tcp_server {
         struct sockaddr_in client_address_;
         std::string client_ip_;
         char data_[MTU_SIZE];
-
 };
 
 #endif // TCP_SERVER_HPP

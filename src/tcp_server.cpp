@@ -105,6 +105,8 @@ void tcp_server::accept_connection() {
 
 //---------------------------------------------------------------------------------------------------------------------
 tcp_server::~tcp_server(){
+    stop();
+}
 
     // todo: clean up
 
@@ -113,6 +115,16 @@ void tcp_server::handle_sigint()
     signal(SIGINT, tcp_server::sigintHandler);
 }
 
+
+//---------------------------------------------------------------------------------------------------------------------
+void tcp_server::stop(){
+
+    // TODO: clean up
+    shutdown(socket_handle_, SHUT_RDWR);
+    close(socket_handle_);
+
+    shutdown(client_handle_, SHUT_RDWR);
+    close(client_handle_);
 }
 
 
