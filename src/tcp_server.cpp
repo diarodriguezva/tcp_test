@@ -4,9 +4,16 @@
 #include <vector>
 #include <cstring>
 
+#include <signal.h>
+
 #include <sys/socket.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+
+
+// Declare static variables
+bool tcp_server::running_ = true;
 
 //---------------------------------------------------------------------------------------------------------------------
 tcp_server::tcp_server(int port) {
@@ -33,8 +40,11 @@ tcp_server::tcp_server(int port) {
         error_handling("tcp_server: setsockopt(SO_REUSEPORT) failed with errno: " + std::to_string(errsv));
     }
 
-    memset(&server_address_, 0, sizeof(server_address_));
+    // Make socket handle non-blocking
+    if (fcntl(socket_handle_, F_SETFL, O_NONBLOCK) < 0)
+        error_handling("tcp_server: fcnl() failed");
 
+    memset(&server_address_, 0, sizeof(server_address_));
     server_address_.sin_family = AF_INET;
     server_address_.sin_addr.s_addr = htonl(INADDR_ANY);
     server_address_.sin_port = htons(port);
@@ -60,30 +70,35 @@ tcp_server::tcp_server(int port) {
 void tcp_server::accept_connection() {
 
     socklen_t client_socket_size = sizeof(client_address_);
-    int status;
+    int msg_size;
 
-    // todo: check for dead connection and go back to listening for new ones
-    while (true){
+    // TODO: check for dead connection and go back to listening for new ones
+    while (running_)
+    {
         client_handle_ = accept(socket_handle_, (struct sockaddr*)&client_address_, &client_socket_size);
-        client_ip_ = inet_ntoa(client_address_.sin_addr);
+        if (client_handle_ < 0)
+            continue;
 
+        client_ip_ = inet_ntoa(client_address_.sin_addr);
         std::cout << "[info] accepted connection from: " << client_ip_ << std::endl;
 
         do
         {
-            status = recv(client_handle_, data_, MTU_SIZE, 0);
-            if (status != -1 && status != 0){
-                std::cout << std::string(data_) << std::endl;
+            msg_size = recv(client_handle_, data_, MTU_SIZE, 0);
+            if (msg_size != -1 && msg_size != 0){
+                std::cout << std::string(data_, msg_size) << std::endl;
             }
             else
             {
-                if(status == 0)
+                if(msg_size == 0)
                 {
                     std::cout << "Ending TCP connection ... " << std::endl;
                 }
                 close(client_handle_);
             }
-        } while (status > 0);
+        } while (msg_size > 0);
+
+        sleep(0.2);
     }
 }
 
@@ -92,6 +107,12 @@ void tcp_server::accept_connection() {
 tcp_server::~tcp_server(){
 
     // todo: clean up
+
+void tcp_server::handle_sigint()
+{
+    signal(SIGINT, tcp_server::sigintHandler);
+}
+
 }
 
 

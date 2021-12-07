@@ -1,6 +1,7 @@
 #ifndef TCP_SERVER_HPP
 #define TCP_SERVER_HPP
 
+#include <iostream>
 #include <string>
 #include <netinet/in.h>
 
@@ -14,8 +15,18 @@ class tcp_server {
         
         void accept_connection();
 
+        void handle_sigint();
+
     private:
         void error_handling(const std::string &message);
+
+        static void sigintHandler(int signum)
+        {
+            running_ = false;
+            std::cout << "Stopping server..." << std::endl;
+        }
+
+        static bool running_;
 
         int socket_handle_{0};
         struct sockaddr_in server_address_;
