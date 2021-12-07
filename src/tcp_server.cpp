@@ -20,7 +20,8 @@ tcp_server::tcp_server(int port) {
 
     std::cout << "[info] server init" << std::endl;
 
-    if (socket_handle_ = socket(AF_INET, SOCK_STREAM, 0) < 0)
+    socket_handle_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_handle_ < 0)
     {
         int errsv = errno;
         error_handling("tcp_server: opening stream socket failed ()with errno: " + std::to_string(errsv));
