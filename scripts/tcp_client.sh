@@ -1,1 +1,1 @@
-netcat -q 1 localhost 6699 <<< $1
+timeout 0.2 netcat localhost 6699 <<< $1
